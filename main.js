@@ -640,6 +640,13 @@ function showTrayHelp() {
         }
         h2 {
           color: #4a90e2;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .app-icon {
+          width: 32px;
+          height: 32px;
         }
         .steps {
           margin-top: 15px;
@@ -663,11 +670,11 @@ function showTrayHelp() {
       </style>
     </head>
     <body>
-      <h2>Finding NoteWhirl in System Tray</h2>
+      <h2><img src="assets/icon-3.png" class="app-icon">Finding NoteWhirl in System Tray</h2>
       <div class="steps">
         <div class="step">1. Look at the bottom-right corner of your screen in the taskbar (notification area)</div>
         <div class="step">2. Click on the up-arrow icon (^) to show hidden icons</div>
-        <div class="step">3. Look for the NoteWhirl icon</div>
+        <div class="step">3. Look for the NoteWhirl icon <img src="assets/icon-3.png" style="width: 16px; height: 16px; vertical-align: middle;"></div>
         <div class="step">4. Click on the icon to restore the app</div>
         <div class="step">5. To make the icon always visible, drag it from the hidden icons area to your taskbar</div>
       </div>

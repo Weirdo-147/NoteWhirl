@@ -394,7 +394,7 @@ body.theme-dark .color-preview {
   padding: 4px 0;
   border-bottom: 1px solid rgba(0,0,0,0.1);
   outline: none;
-  width: 100%;
+  width: calc(100% - 50px); /* Make room for delete button */
   z-index: 50;
 }
 
@@ -406,6 +406,25 @@ body.theme-dark .color-preview {
   display: flex;
   gap: 6px;
   align-items: center;
+}
+
+/* Reposition delete button */
+.note-title-row .delete-btn {
+  margin-left: auto;
+  font-size: 18px;
+  line-height: 1;
+  color: #ff4444;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.note-title-row .delete-btn:hover {
+  background: rgba(0,0,0,0.1);
+  transform: translateY(-1px);
 }
 
 .note textarea {
@@ -844,6 +863,7 @@ body.theme-dark .formatting-toolbar {
 .format-btn.active {
   background: rgba(0,0,0,0.15);
   color: #4a90e2;
+  font-weight: bold;
 }
 
 body.theme-dark .format-btn {
@@ -855,7 +875,7 @@ body.theme-dark .format-btn:hover {
 }
 
 body.theme-dark .format-btn.active {
-  background: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.2);
   color: #6ba9f0;
 }
 

@@ -100,7 +100,7 @@
   <!-- Success Dialog -->
   <div id="success-dialog" class="dialog hidden">
     <div class="dialog-content">
-      <h3><img src="assets/icon-3.png" class="dialog-icon"> Reminder Set</h3>
+      <h3><img src="assets/icon-3.png" class="dialog-icon"> <span id="success-dialog-title">Success</span></h3>
       <p id="success-message"></p>
       <div class="dialog-buttons">
         <button id="close-success-dialog" class="dialog-btn">OK</button>
@@ -514,6 +514,28 @@
       titleInput.addEventListener('input', () => debouncedSaveNotes());
       titleRow.appendChild(titleInput);
       
+      // Add delete button to title row
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.textContent = '×';
+      deleteBtn.title = "Delete note";
+      deleteBtn.onclick = () => {
+        // Check if there's content in the note
+        const hasTitle = note.querySelector('.note-title').value.trim() !== '';
+        const hasText = note.querySelector('.note-editor') 
+          ? note.querySelector('.note-editor').innerHTML.trim() !== ''
+          : note.querySelector('textarea').value.trim() !== '';
+        
+        if (hasTitle || hasText) {
+          // Show confirmation dialog
+          showDeleteConfirmation(note);
+        } else {
+          // No content, delete immediately
+          deleteNote(note);
+        }
+      };
+      titleRow.appendChild(deleteBtn);
+      
       header.appendChild(titleRow);
       
       // Create a second row for controls
@@ -612,12 +634,7 @@
       
       controlsRow.appendChild(colorSelect);
 
-      // Create font size dropdown with a label
-      const fontLabel = document.createElement('span');
-      fontLabel.textContent = 'A';
-      fontLabel.style.marginRight = '2px';
-      controlsRow.appendChild(fontLabel);
-      
+      // Create font size dropdown without the 'A' label
       const fontSizeSelect = document.createElement('select');
       fontSizeSelect.className = 'font-size-select';
       
@@ -683,19 +700,7 @@
       
       controlsRow.appendChild(fontFamilySelect);
 
-      // Add advanced tools buttons
-      if (appSettings.enable_formatting === 'true') {
-        const formatBtn = document.createElement('button');
-        formatBtn.className = 'format-btn';
-        formatBtn.title = "Text formatting";
-        formatBtn.textContent = 'A';
-        formatBtn.style.fontWeight = 'bold';
-        formatBtn.onclick = (e) => {
-          e.stopPropagation();
-          toggleFormatting(note);
-        };
-        controlsRow.appendChild(formatBtn);
-      }
+      // Add advanced tools buttons (removing the formatting 'A' button)
       
       if (appSettings.enable_checklists === 'true') {
         const checklistBtn = document.createElement('button');
@@ -744,27 +749,6 @@
         debouncedSaveNotes();
       };
       controlsRow.appendChild(alwaysOnTopBtn);
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'delete-btn';
-      deleteBtn.textContent = '×';
-      deleteBtn.title = "Delete note";
-      deleteBtn.onclick = () => {
-        // Check if there's content in the note
-        const hasTitle = note.querySelector('.note-title').value.trim() !== '';
-        const hasText = note.querySelector('.note-editor') 
-          ? note.querySelector('.note-editor').innerHTML.trim() !== ''
-          : note.querySelector('textarea').value.trim() !== '';
-        
-        if (hasTitle || hasText) {
-          // Show confirmation dialog
-          showDeleteConfirmation(note);
-        } else {
-          // No content, delete immediately
-          deleteNote(note);
-        }
-      };
-      controlsRow.appendChild(deleteBtn);
       
       header.appendChild(controlsRow);
       note.appendChild(header);
@@ -1562,6 +1546,18 @@
           note.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       });
+      
+      // Listen for image save events
+      ipcRenderer.on('save-image-reply', (event, response) => {
+        if (response.success) {
+          console.log('Image saved successfully:', response);
+          // Could show a brief success message here
+          showSuccessDialog('Image added successfully');
+        } else {
+          console.error('Error saving image:', response.error);
+          alert('Failed to save image: ' + response.error);
+        }
+      });
 
       // Success dialog
       document.getElementById('close-success-dialog').addEventListener('click', hideSuccessDialog);
@@ -1623,6 +1619,16 @@
       const dialog = document.getElementById('success-dialog');
       const overlay = document.getElementById('overlay');
       const messageElement = document.getElementById('success-message');
+      const titleElement = document.getElementById('success-dialog-title');
+      
+      // Set the appropriate title based on the message content
+      if (message.includes('Reminder set')) {
+        titleElement.textContent = 'Reminder Set';
+      } else if (message.includes('Image added')) {
+        titleElement.textContent = 'Image Added';
+      } else {
+        titleElement.textContent = 'Success';
+      }
       
       messageElement.textContent = message;
       
@@ -1660,11 +1666,7 @@
         toggleFormatting(note);
       }
       
-      // Update format button visibility
-      const formatBtn = note.querySelector('.format-btn[title="Text formatting"]');
-      if (formatBtn) {
-        formatBtn.style.display = appSettings.enable_formatting === 'true' ? 'block' : 'none';
-      }
+      // Update format button visibility (removed since we no longer have the 'A' button)
       
       // Update checklist button visibility
       const checklistBtn = note.querySelector('.format-btn[title="Add checklist"]');
@@ -1715,9 +1717,29 @@
       divider2.className = 'format-divider';
       toolbar.appendChild(divider2);
       
-      // Blockquote button
-      const quoteBtn = createFormatButton('"', 'Quote', 'formatBlock', 'blockquote');
-      toolbar.appendChild(quoteBtn);
+      // Markdown button
+      const mdBtn = document.createElement('button');
+      mdBtn.className = 'format-btn';
+      mdBtn.textContent = 'MD';
+      mdBtn.title = "Apply Markdown";
+      mdBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        applyMarkdown(note);
+      });
+      toolbar.appendChild(mdBtn);
+      
+      // Text color button
+      const colorBtn = document.createElement('button');
+      colorBtn.className = 'format-btn';
+      colorBtn.innerHTML = '<span style="color:red;">A</span>';
+      colorBtn.title = "Change Text Color";
+      colorBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        changeTextColor(note);
+      });
+      toolbar.appendChild(colorBtn);
       
       // If images are enabled, add image upload button
       if (appSettings.enable_images === 'true') {
@@ -1755,6 +1777,10 @@
         }
       });
       
+      // Add selection change event to update formatting button states
+      editor.addEventListener('mouseup', () => updateFormatButtonStates(note));
+      editor.addEventListener('keyup', () => updateFormatButtonStates(note));
+      
       note.appendChild(editor);
       
       return editor;
@@ -1766,6 +1792,9 @@
       button.className = 'format-btn';
       button.textContent = text;
       button.title = title;
+      button.dataset.command = command;
+      button.dataset.value = value || '';
+      
       button.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -1776,13 +1805,47 @@
           const editor = note.querySelector('.note-editor');
           if (editor) {
             editor.focus();
+            
+            // Toggle active state for formatting buttons
+            if (['bold', 'italic', 'underline'].includes(command)) {
+              button.classList.toggle('active');
+            }
+            
+            // Execute the command
             document.execCommand(command, false, value);
+            
+            // Update the active state of all formatting buttons
+            updateFormatButtonStates(note);
           }
         }
         
         button.blur(); // Remove focus
       });
       return button;
+    }
+    
+    // Update formatting button states based on current selection
+    function updateFormatButtonStates(note) {
+      const editor = note.querySelector('.note-editor');
+      if (!editor) return;
+      
+      // Get all format buttons in the note
+      const formatButtons = note.querySelectorAll('.format-btn');
+      
+      formatButtons.forEach(button => {
+        const command = button.dataset.command;
+        
+        // Only check state for basic formatting commands
+        if (['bold', 'italic', 'underline'].includes(command)) {
+          const isActive = document.queryCommandState(command);
+          
+          if (isActive) {
+            button.classList.add('active');
+          } else {
+            button.classList.remove('active');
+          }
+        }
+      });
     }
     
     // Toggle formatting toolbar and editor
@@ -1810,6 +1873,37 @@
     
     // Insert image into note
     function insertImage(note) {
+      // Make sure the note has an ID first - this could be the issue
+      if (!note.dataset.id) {
+        console.log("Note has no ID yet. Saving note first...");
+        // Assign temporary ID if needed
+        note.dataset.id = Date.now().toString();
+        // Save the note to get a proper ID
+        saveNotes();
+        console.log("Note saved with ID:", note.dataset.id);
+      }
+
+      // Ensure the note has a rich text editor
+      let editor = note.querySelector('.note-editor');
+      if (!editor) {
+        console.log("Converting note to rich text format for image support");
+        const textarea = note.querySelector('textarea');
+        if (textarea) {
+          // Get the text content before removing textarea
+          const textContent = textarea.value;
+          // Remove textarea
+          textarea.remove();
+          
+          // Create rich text editor
+          editor = createRichTextEditor(note);
+          // Preserve the original text content
+          editor.innerText = textContent;
+        } else {
+          // No textarea or editor found, create a new editor
+          editor = createRichTextEditor(note);
+        }
+      }
+
       // Create file input
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
@@ -1837,15 +1931,17 @@
           
           // Save image to database
           if (note.dataset.id) {
+            console.log("Sending image to save for note ID:", note.dataset.id);
             ipcRenderer.send('save-image', {
               noteId: note.dataset.id,
               imageData: imageData,
               fileName: file.name
             });
             
-            // Add image placeholder
+            // Add image to editor
             const editor = note.querySelector('.note-editor');
             if (editor) {
+              console.log("Adding image to editor");
               // Create image container
               const imgContainer = document.createElement('div');
               imgContainer.className = 'image-container';
@@ -1884,7 +1980,13 @@
               editor.appendChild(imgContainer);
               note.dataset.hasImages = 'true';
               debouncedSaveNotes();
+            } else {
+              console.error("No editor found in note, cannot add image");
+              alert("Please enable rich text formatting to add images.");
             }
+          } else {
+            console.error("Note still has no ID after saving");
+            alert("Could not save image: Note ID not found");
           }
           
           document.body.removeChild(fileInput);
@@ -2048,6 +2150,204 @@
       }
       
       currentNoteId = null;
+    }
+
+    // Apply Markdown formatting to selected text
+    function applyMarkdown(note) {
+      const editor = note.querySelector('.note-editor');
+      if (!editor) return;
+      
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+      
+      const range = selection.getRangeAt(0);
+      const selectedText = range.toString();
+      
+      if (!selectedText) {
+        alert("Please select text to apply formatting");
+        return;
+      }
+      
+      // Show format options
+      const options = [
+        { label: "Heading 1", action: () => { applyHeadingFormat(1); } },
+        { label: "Heading 2", action: () => { applyHeadingFormat(2); } },
+        { label: "Code Block", action: () => { applyCodeFormat(); } },
+        { label: "Link", action: () => { createHyperlink(); } },
+      ];
+      
+      // Create format selection dialog
+      const dialog = document.createElement('div');
+      dialog.className = 'markdown-dialog';
+      dialog.style.position = 'absolute';
+      dialog.style.zIndex = '3000';
+      dialog.style.background = 'white';
+      dialog.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+      dialog.style.borderRadius = '4px';
+      dialog.style.padding = '8px 0';
+      
+      // Dark theme support
+      if (document.body.classList.contains('theme-dark')) {
+        dialog.style.background = '#333';
+        dialog.style.color = '#e0e0e0';
+      }
+      
+      // Get cursor position for dialog placement
+      const rect = range.getBoundingClientRect();
+      dialog.style.left = (rect.left + window.scrollX) + 'px';
+      dialog.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+      
+      // Add options to dialog
+      options.forEach(option => {
+        const button = document.createElement('button');
+        button.textContent = option.label;
+        button.style.display = 'block';
+        button.style.width = '100%';
+        button.style.textAlign = 'left';
+        button.style.background = 'none';
+        button.style.border = 'none';
+        button.style.padding = '8px 12px';
+        button.style.cursor = 'pointer';
+        
+        if (document.body.classList.contains('theme-dark')) {
+          button.style.color = '#e0e0e0';
+        }
+        
+        button.addEventListener('mouseenter', () => {
+          button.style.background = document.body.classList.contains('theme-dark') ? '#444' : '#f0f0f0';
+        });
+        
+        button.addEventListener('mouseleave', () => {
+          button.style.background = 'none';
+        });
+        
+        button.addEventListener('click', () => {
+          // Execute the format action
+          option.action();
+          
+          // Remove dialog
+          document.body.removeChild(dialog);
+          editor.focus();
+        });
+        
+        dialog.appendChild(button);
+      });
+      
+      // Add close button
+      const closeButton = document.createElement('button');
+      closeButton.textContent = 'Cancel';
+      closeButton.style.display = 'block';
+      closeButton.style.width = '100%';
+      closeButton.style.textAlign = 'center';
+      closeButton.style.background = 'none';
+      closeButton.style.border = 'none';
+      closeButton.style.borderTop = '1px solid ' + (document.body.classList.contains('theme-dark') ? '#555' : '#eee');
+      closeButton.style.padding = '8px 12px';
+      closeButton.style.marginTop = '5px';
+      closeButton.style.cursor = 'pointer';
+      closeButton.style.color = document.body.classList.contains('theme-dark') ? '#bbb' : '#666';
+      
+      closeButton.addEventListener('click', () => {
+        document.body.removeChild(dialog);
+        editor.focus();
+      });
+      
+      dialog.appendChild(closeButton);
+      document.body.appendChild(dialog);
+      
+      // Close dialog when clicking outside
+      setTimeout(() => {
+        const closeHandler = (e) => {
+          if (!dialog.contains(e.target)) {
+            document.body.removeChild(dialog);
+            document.removeEventListener('mousedown', closeHandler);
+          }
+        };
+        document.addEventListener('mousedown', closeHandler);
+      }, 0);
+      
+      // Helper functions to apply actual formatting
+      function applyHeadingFormat(level) {
+        // Apply heading format
+        if (level === 1) {
+          document.execCommand('fontSize', false, '6'); // Large font
+          document.execCommand('bold', false, null);
+        } else if (level === 2) {
+          document.execCommand('fontSize', false, '5'); // Medium-large font
+          document.execCommand('bold', false, null);
+        }
+        debouncedSaveNotes();
+      }
+      
+      function applyCodeFormat() {
+        // Create a code block with fixed-width font and background
+        let codeElement = document.createElement('code');
+        codeElement.style.fontFamily = 'monospace';
+        codeElement.style.backgroundColor = document.body.classList.contains('theme-dark') ? '#222' : '#f0f0f0';
+        codeElement.style.padding = '2px 4px';
+        codeElement.style.borderRadius = '3px';
+        codeElement.style.fontSize = '0.9em';
+        codeElement.textContent = selectedText;
+        
+        // Replace selection with code element
+        range.deleteContents();
+        range.insertNode(codeElement);
+        
+        debouncedSaveNotes();
+      }
+      
+      function createHyperlink() {
+        // Ask for URL
+        const url = prompt('Enter URL:', 'https://');
+        if (url) {
+          document.execCommand('createLink', false, url);
+          
+          // Find the created link and set target attribute
+          const links = editor.querySelectorAll('a');
+          if (links.length > 0) {
+            const lastLink = links[links.length - 1];
+            lastLink.setAttribute('target', '_blank');
+            lastLink.style.color = '#4a90e2';
+          }
+          
+          debouncedSaveNotes();
+        }
+      }
+    }
+    
+    // Change text color
+    function changeTextColor(note) {
+      const editor = note.querySelector('.note-editor');
+      if (!editor) return;
+      
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+      
+      // Check if text is selected
+      const range = selection.getRangeAt(0);
+      if (range.collapsed) {
+        alert("Please select text to change its color");
+        return;
+      }
+      
+      // Create color picker
+      const colorPicker = document.createElement('input');
+      colorPicker.type = 'color';
+      colorPicker.value = '#4a90e2'; // Default blue color
+      colorPicker.style.position = 'absolute';
+      colorPicker.style.left = '-9999px'; // Hide it visually
+      document.body.appendChild(colorPicker);
+      
+      // Handle color selection
+      colorPicker.addEventListener('change', () => {
+        document.execCommand('foreColor', false, colorPicker.value);
+        document.body.removeChild(colorPicker);
+        editor.focus();
+        debouncedSaveNotes();
+      });
+      
+      // Trigger color picker
+      colorPicker.click();
     }
   </script>
 </body>
