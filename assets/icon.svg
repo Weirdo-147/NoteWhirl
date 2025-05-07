@@ -1,0 +1,21 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="#4A90E2"/>
+  
+  <!-- Note shadow -->
+  <rect x="116" y="126" width="300" height="300" rx="20" fill="#2C5A9E"/>
+  
+  <!-- Yellow sticky note -->
+  <rect x="96" y="106" width="300" height="300" rx="20" fill="#FFFF99"/>
+  
+  <!-- Corner fold -->
+  <path d="M336 106L396 166V106H336Z" fill="#E6E680"/>
+  
+  <!-- Lines of 'text' -->
+  <rect x="136" y="176" width="220" height="12" rx="6" fill="#666666" fill-opacity="0.5"/>
+  <rect x="136" y="206" width="180" height="12" rx="6" fill="#666666" fill-opacity="0.5"/>
+  <rect x="136" y="236" width="200" height="12" rx="6" fill="#666666" fill-opacity="0.5"/>
+  <rect x="136" y="266" width="160" height="12" rx="6" fill="#666666" fill-opacity="0.5"/>
+  <rect x="136" y="296" width="220" height="12" rx="6" fill="#666666" fill-opacity="0.5"/>
+  <rect x="136" y="326" width="190" height="12" rx="6" fill="#666666" fill-opacity="0.5"/>
+</svg> 

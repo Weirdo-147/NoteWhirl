@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NoteWhirl</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="assets/icon-3.png">
+  <!-- Add Roboto font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="toolbar">
+    <img src="assets/icon-3.png" id="app-icon" class="app-icon" alt="NoteWhirl">
+    <button id="newNoteBtn" class="toolbar-btn">New Note</button>
+    <button id="exportBtn" class="toolbar-btn export-btn">Export</button>
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Search notes..." class="search-input">
+      <button id="clearSearchBtn" class="clear-btn">×</button>
+    </div>
+    <button id="helpBtn" class="toolbar-btn help-btn">?</button>
+    <button id="settingsBtn" class="toolbar-btn settings-btn">⚙️</button>
+  </div>
+  <div id="notes-container"></div>
+  
+  <!-- Help Dialog -->
+  <div id="help-dialog" class="dialog hidden">
+    <div class="dialog-content">
+      <h3>Keyboard Shortcuts</h3>
+      <div class="shortcuts-list">
+        <div class="shortcut-item">
+          <span class="shortcut-key">Ctrl+N</span>
+          <span class="shortcut-desc">Create a new note</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-key">Delete</span>
+          <span class="shortcut-desc">Delete the selected note</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-key">Ctrl+F</span>
+          <span class="shortcut-desc">Focus the search bar</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-key">Ctrl+S</span>
+          <span class="shortcut-desc">Open settings panel</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-key">Escape</span>
+          <span class="shortcut-desc">Clear search or close dialogs</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-key">Ctrl+H</span>
+          <span class="shortcut-desc">Show/hide this help dialog</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-key">Ctrl+E</span>
+          <span class="shortcut-desc">Export all notes</span>
+        </div>
+      </div>
+      
+      <h3>Advanced Features</h3>
+      <p>This version includes advanced features that can be toggled in Settings:</p>
+      <ul>
+        <li><b>Text Formatting</b>: Use the toolbar to style your notes with bold, italic, lists, and more.</li>
+        <li><b>Images</b>: Attach images to your notes (max 5MB per image).</li>
+        <li><b>Checklists</b>: Create interactive to-do lists in your notes.</li>
+        <li><b>Reminders</b>: Set time-based alerts for important notes.</li>
+      </ul>
+      
+      <div class="dialog-buttons">
+        <button id="close-help" class="dialog-btn cancel-btn">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Confirmation Dialog -->
+  <div id="confirmation-dialog" class="confirmation-dialog hidden">
+    <div class="dialog-content">
+      <h3>Delete Note?</h3>
+      <p>This note has content. Are you sure you want to delete it?</p>
+      <div class="dialog-buttons">
+        <button id="cancel-delete" class="dialog-btn cancel-btn">Cancel</button>
+        <button id="confirm-delete" class="dialog-btn delete-btn">Delete</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Export Success Dialog -->
+  <div id="export-success-dialog" class="dialog hidden">
+    <div class="dialog-content">
+      <h3>Export Successful</h3>
+      <p id="export-success-message"></p>
+      <div class="dialog-buttons">
+        <button id="open-export-folder" class="dialog-btn">Open Folder</button>
+        <button id="close-export-dialog" class="dialog-btn cancel-btn">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Success Dialog -->
+  <div id="success-dialog" class="dialog hidden">
+    <div class="dialog-content">
+      <h3><img src="assets/icon-3.png" class="dialog-icon"> Reminder Set</h3>
+      <p id="success-message"></p>
+      <div class="dialog-buttons">
+        <button id="close-success-dialog" class="dialog-btn">OK</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="overlay" class="overlay hidden"></div>
+  
+  <!-- Settings Panel -->
+  <div id="settings-panel">
+    <div class="settings-header">
+      <h2 class="settings-title">Settings</h2>
+      <button id="close-settings" class="close-settings">×</button>
+    </div>
+    
+    <div class="settings-section">
+      <h3 class="settings-section-title">Theme</h3>
+      <div class="settings-row">
+        <label for="theme-select">App Theme</label>
+        <select id="theme-select" class="settings-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="settings-section">
+      <h3 class="settings-section-title">Default Note Settings</h3>
+      <div class="settings-row">
+        <label for="default-font-size">Font Size</label>
+        <select id="default-font-size" class="settings-select">
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+          <option value="xlarge">X-Large</option>
+        </select>
+      </div>
+      
+      <div class="settings-row">
+        <label for="default-font-family">Font Family</label>
+        <select id="default-font-family" class="settings-select">
+          <option value="default">Default System Font</option>
+          <option value="arial">Arial</option>
+          <option value="times">Times New Roman</option>
+          <option value="roboto">Roboto</option>
+          <option value="courier">Courier New</option>
+          <option value="georgia">Georgia</option>
+        </select>
+      </div>
+      
+      <div class="settings-color-row">
+        <label for="default-color">Default Note Color</label>
+        <div class="color-preview" id="color-preview"></div>
+        <select id="default-color-select" class="settings-select">
+          <option value="custom">Custom Color</option>
+          <option value="random">Random</option>
+          <option value="#ffff99">Yellow</option>
+          <option value="#99ff99">Green</option>
+          <option value="#9999ff">Blue</option>
+          <option value="#ff9999">Red</option>
+          <option value="#f8d7a0">Orange</option>
+          <option value="#d7a0f8">Purple</option>
+        </select>
+        <input type="color" id="default-color" class="settings-input" value="#ffff99">
+      </div>
+    </div>
+    
+    <!-- Advanced Settings Section -->
+    <div class="settings-section settings-section-advanced">
+      <h3 class="settings-section-title">Advanced Features</h3>
+      
+      <div class="feature-toggle-container">
+        <span class="feature-toggle-label">Text Formatting</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="enable-formatting" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      
+      <div class="feature-toggle-container">
+        <span class="feature-toggle-label">Checklists</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="enable-checklists" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      
+      <div class="feature-toggle-container">
+        <span class="feature-toggle-label">Image Attachments</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="enable-images" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      
+      <div class="feature-toggle-container">
+        <span class="feature-toggle-label">Reminders</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="enable-reminders" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+      
+    <button id="apply-settings" class="apply-settings-btn">Apply Settings</button>
+  </div>
+  
+  <!-- Reminder Dialog -->
+  <div id="reminder-dialog" class="dialog hidden">
+    <div class="dialog-content">
+      <h3>Set Reminder</h3>
+      <div class="reminder-dialog-content">
+        <div class="reminder-dialog-row">
+          <label for="reminder-title">Title</label>
+          <input type="text" id="reminder-title" placeholder="Reminder title...">
+        </div>
+        <div class="reminder-dialog-row">
+          <label for="reminder-message">Message</label>
+          <textarea id="reminder-message" placeholder="Reminder details..."></textarea>
+        </div>
+        <div class="reminder-dialog-row">
+          <label for="reminder-datetime">Date & Time</label>
+          <input type="datetime-local" id="reminder-datetime">
+        </div>
+        <div class="reminder-dialog-row notification-options">
+          <label>Notification Options:</label>
+          <div class="checkbox-option">
+            <input type="checkbox" id="reminder-play-sound" checked>
+            <label for="reminder-play-sound">Play sound</label>
+          </div>
+          <div class="checkbox-option">
+            <input type="checkbox" id="reminder-urgent">
+            <label for="reminder-urgent">Use urgent style (high priority)</label>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-buttons">
+        <button id="cancel-reminder" class="dialog-btn cancel-btn">Cancel</button>
+        <button id="save-reminder" class="dialog-btn">Save Reminder</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Lightbox for image viewing -->
+  <div id="lightbox" class="lightbox">
+    <img id="lightbox-image" class="lightbox-content">
+    <button id="lightbox-close" class="lightbox-close">×</button>
+  </div>
+
+  <style>
+    /* Add CSS for the dialog icon */
+    .dialog-icon {
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    
+    /* Add styles for notification options */
+    .notification-options {
+      margin-top: 10px;
+    }
+    
+    .checkbox-option {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+    }
+    
+    .checkbox-option input[type="checkbox"] {
+      margin-right: 8px;
+    }
+    
+    body.theme-dark .checkbox-option {
+      color: #e0e0e0;
+    }
+  </style>
+
+  <script>
+    const { ipcRenderer, shell } = require('electron');
+    let notes = [];
+    let activeNote = null;
+    let saveTimeout = null;
+    let noteToDelete = null;
+    let exportFolderPath = null;
+    let activeReminders = new Map();
+    let currentNoteId = null;
+    let appSettings = {
+      theme: 'light',
+      default_color: '#ffff99',
+      default_font_size: 'medium',
+      default_font_family: 'default',
+      enable_formatting: 'true',
+      enable_images: 'true',
+      enable_reminders: 'true',
+      enable_checklists: 'true'
+    };
+
+    // Define colors globally for consistent use throughout the app
+    const COLORS = [
+      { value: '#ffff99', name: 'Yellow', rgb: 'rgb(255, 255, 153)' },
+      { value: '#99ff99', name: 'Green', rgb: 'rgb(153, 255, 153)' },
+      { value: '#9999ff', name: 'Blue', rgb: 'rgb(153, 153, 255)' },
+      { value: '#ff9999', name: 'Red', rgb: 'rgb(255, 153, 153)' },
+      { value: '#f8d7a0', name: 'Orange', rgb: 'rgb(248, 215, 160)' },
+      { value: '#d7a0f8', name: 'Purple', rgb: 'rgb(215, 160, 248)' }
+    ];
+    
+    // Font families for notes
+    const FONT_FAMILIES = [
+      { value: 'default', label: 'Default System Font', class: 'font-default' },
+      { value: 'arial', label: 'Arial', class: 'font-arial' },
+      { value: 'times', label: 'Times New Roman', class: 'font-times' },
+      { value: 'roboto', label: 'Roboto', class: 'font-roboto' },
+      { value: 'courier', label: 'Courier New', class: 'font-courier' },
+      { value: 'georgia', label: 'Georgia', class: 'font-georgia' }
+    ];
+
+    // Load settings from the database
+    async function loadSettings() {
+      try {
+        const settings = await ipcRenderer.invoke('load-settings');
+        appSettings = { ...appSettings, ...settings };
+        
+        // Apply settings to the UI
+        applyTheme(appSettings.theme);
+        document.getElementById('theme-select').value = appSettings.theme;
+        document.getElementById('default-font-size').value = appSettings.default_font_size;
+        document.getElementById('default-font-family').value = appSettings.default_font_family;
+        document.getElementById('default-color').value = appSettings.default_color;
+        
+        // Set advanced features toggles
+        document.getElementById('enable-formatting').checked = appSettings.enable_formatting === 'true';
+        document.getElementById('enable-images').checked = appSettings.enable_images === 'true';
+        document.getElementById('enable-reminders').checked = appSettings.enable_reminders === 'true';
+        document.getElementById('enable-checklists').checked = appSettings.enable_checklists === 'true';
+        
+        updateColorPreview(appSettings.default_color);
+        
+        // Ensure all existing notes reflect the current settings
+        document.querySelectorAll('.note').forEach(note => {
+          updateNoteFormatting(note);
+        });
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    }
+    
+    // Save settings to the database
+    function saveSettings() {
+      ipcRenderer.send('save-settings', appSettings);
+    }
+    
+    // Apply theme to the app
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.body.classList.add('theme-dark');
+        // Change app icon for dark theme
+        document.getElementById('app-icon').src = 'assets/icon-8.png';
+      } else {
+        document.body.classList.remove('theme-dark');
+        // Use default icon for light theme
+        document.getElementById('app-icon').src = 'assets/icon-3.png';
+      }
+    }
+    
+    // Update color preview in settings panel
+    function updateColorPreview(color) {
+      const colorPreview = document.getElementById('color-preview');
+      
+      if (color === 'random') {
+        // Create gradient with all available colors for "random" option
+        const colorValues = COLORS.map(c => c.value).join(', ');
+        colorPreview.style.background = `linear-gradient(to right, ${colorValues})`;
+      } else {
+        colorPreview.style.background = color;
+      }
+    }
+    
+    // Toggle settings panel
+    function toggleSettingsPanel() {
+      const settingsPanel = document.getElementById('settings-panel');
+      settingsPanel.classList.toggle('open');
+      
+      // Show/hide overlay when settings panel is open/closed
+      const overlay = document.getElementById('overlay');
+      if (settingsPanel.classList.contains('open')) {
+        overlay.classList.remove('hidden');
+      } else {
+        if (document.getElementById('confirmation-dialog').classList.contains('hidden') &&
+            document.getElementById('help-dialog').classList.contains('hidden') &&
+            document.getElementById('export-success-dialog').classList.contains('hidden')) {
+          overlay.classList.add('hidden');
+        }
+      }
+    }
+    
+    // Apply font family to note
+    function applyFontFamily(note, fontFamily) {
+      // Remove any existing font classes
+      FONT_FAMILIES.forEach(font => {
+        note.classList.remove(font.class);
+      });
+      
+      // Add the selected font class
+      const fontObj = FONT_FAMILIES.find(f => f.value === fontFamily) || FONT_FAMILIES[0];
+      note.classList.add(fontObj.class);
+    }
+
+    // Format date helper function
+    function formatDate(date) {
+      const options = { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit' 
+      };
+      return new Date(date).toLocaleString(undefined, options);
+    }
+
+    // Helper function to find color object by color value (hex or rgb)
+    function findColorByValue(colorValue) {
+      if (!colorValue) return COLORS[0]; // Default to yellow if no value
+      
+      // Normalize the color value (lowercase, no spaces)
+      const normalizedValue = colorValue.toLowerCase().trim();
+      
+      // Try to find exact match in hex values
+      let colorMatch = COLORS.find(color => color.value.toLowerCase() === normalizedValue);
+      if (colorMatch) return colorMatch;
+      
+      // Try to find exact match in rgb values
+      colorMatch = COLORS.find(color => color.rgb.toLowerCase() === normalizedValue);
+      if (colorMatch) return colorMatch;
+      
+      // If it's an RGB value, try to parse it and find the closest color
+      if (normalizedValue.startsWith('rgb')) {
+        try {
+          // Extract RGB values
+          const rgbMatch = normalizedValue.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+          if (rgbMatch) {
+            const [_, r, g, b] = rgbMatch.map(Number);
+            
+            // Look for exact match in our color list
+            for (const color of COLORS) {
+              const rgbColorMatch = color.rgb.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+              if (rgbColorMatch) {
+                const [_, cr, cg, cb] = rgbColorMatch.map(Number);
+                // Check if it's a close match (allowing for small differences due to rounding)
+                if (Math.abs(r - cr) <= 5 && Math.abs(g - cg) <= 5 && Math.abs(b - cb) <= 5) {
+                  return color;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing RGB value:', e);
+        }
+      }
+      
+      // If no match found, default to yellow
+      console.log('No color match found for:', colorValue, 'defaulting to yellow');
+      return COLORS[0];
+    }
+
+    // Get note color based on settings
+    function getNoteDefaultColor() {
+      if (appSettings.default_color === 'random') {
+        // Return a random color from COLORS array
+        return COLORS[Math.floor(Math.random() * COLORS.length)].value;
+      }
+      return appSettings.default_color;
+    }
+
+    // Note creation and management
+    function createNote(x = Math.random() * 500, y = Math.random() * 300, timestamp = Date.now()) {
+      const note = document.createElement('div');
+      note.className = 'note hidden';
+      note.style.left = `${x}px`;
+      note.style.top = `${y}px`;
+      note.dataset.createdAt = timestamp;
+      
+      // Use default color from settings or randomize
+      const noteColor = getNoteDefaultColor();
+      note.style.backgroundColor = noteColor;
+      
+      // Apply default font family
+      applyFontFamily(note, appSettings.default_font_family);
+
+      const header = document.createElement('div');
+      header.className = 'note-header';
+      
+      // Create title row with drag handle
+      const titleRow = document.createElement('div');
+      titleRow.className = 'note-title-row';
+      
+      // Create drag handle
+      const dragHandle = document.createElement('div');
+      dragHandle.className = 'drag-handle';
+      dragHandle.innerHTML = '⋮⋮'; // Double vertical dots as drag handle icon
+      dragHandle.title = "Drag to move note";
+      titleRow.appendChild(dragHandle);
+      
+      // Create title input
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleInput.className = 'note-title';
+      titleInput.placeholder = 'Title';
+      titleInput.addEventListener('input', () => debouncedSaveNotes());
+      titleRow.appendChild(titleInput);
+      
+      header.appendChild(titleRow);
+      
+      // Create a second row for controls
+      const controlsRow = document.createElement('div');
+      controlsRow.className = 'controls-row';
+      
+      // Create color dropdown with a label
+      const colorLabel = document.createElement('span');
+      colorLabel.textContent = '🎨';
+      colorLabel.style.marginRight = '2px';
+      controlsRow.appendChild(colorLabel);
+      
+      const colorSelect = document.createElement('select');
+      colorSelect.className = 'color-select';
+      
+      COLORS.forEach(color => {
+        const option = document.createElement('option');
+        option.value = color.value;
+        option.textContent = color.name;
+        option.style.backgroundColor = color.value;
+        colorSelect.appendChild(option);
+      });
+      
+      // Add custom color option
+      const customOption = document.createElement('option');
+      customOption.value = 'custom';
+      customOption.textContent = 'Custom...';
+      colorSelect.appendChild(customOption);
+      
+      // Set the default color in the dropdown
+      colorSelect.value = noteColor;
+      
+      colorSelect.addEventListener('click', (e) => {
+        // Stop the event from propagating to parent elements
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      colorSelect.addEventListener('change', (e) => {
+        // Stop propagation to prevent other handlers from interfering
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (colorSelect.value === 'custom') {
+          // Show color picker
+          const colorPicker = document.createElement('input');
+          colorPicker.type = 'color';
+          colorPicker.value = note.style.backgroundColor;
+          colorPicker.style.position = 'absolute';
+          colorPicker.style.left = '-9999px';
+          document.body.appendChild(colorPicker);
+          
+          colorPicker.addEventListener('input', () => {
+            note.style.backgroundColor = colorPicker.value;
+          });
+          
+          colorPicker.addEventListener('change', () => {
+            note.style.backgroundColor = colorPicker.value;
+            document.body.removeChild(colorPicker);
+            debouncedSaveNotes();
+            
+            // Find matching color or keep custom
+            const matchingColor = COLORS.find(c => c.value.toLowerCase() === colorPicker.value.toLowerCase());
+            if (matchingColor) {
+              colorSelect.value = matchingColor.value;
+            } else {
+              // Add a new custom option
+              let customExists = false;
+              for (let i = 0; i < colorSelect.options.length; i++) {
+                if (colorSelect.options[i].value === 'custom-value') {
+                  colorSelect.options[i].value = colorPicker.value;
+                  colorSelect.options[i].textContent = 'Custom';
+                  colorSelect.options[i].style.backgroundColor = colorPicker.value;
+                  customExists = true;
+                  break;
+                }
+              }
+              
+              if (!customExists) {
+                const newOption = document.createElement('option');
+                newOption.value = colorPicker.value;
+                newOption.textContent = 'Custom';
+                newOption.style.backgroundColor = colorPicker.value;
+                colorSelect.insertBefore(newOption, customOption);
+              }
+              colorSelect.value = colorPicker.value;
+            }
+          });
+          
+          colorPicker.click();
+        } else {
+          note.style.backgroundColor = colorSelect.value;
+          debouncedSaveNotes();
+        }
+      });
+      
+      controlsRow.appendChild(colorSelect);
+
+      // Create font size dropdown with a label
+      const fontLabel = document.createElement('span');
+      fontLabel.textContent = 'A';
+      fontLabel.style.marginRight = '2px';
+      controlsRow.appendChild(fontLabel);
+      
+      const fontSizeSelect = document.createElement('select');
+      fontSizeSelect.className = 'font-size-select';
+      
+      const fontSizes = [
+        { value: 'small', label: 'Small', size: '12px' },
+        { value: 'medium', label: 'Medium', size: '14px' },
+        { value: 'large', label: 'Large', size: '16px' },
+        { value: 'xlarge', label: 'X-Large', size: '18px' }
+      ];
+      
+      fontSizes.forEach(size => {
+        const option = document.createElement('option');
+        option.value = size.value;
+        option.textContent = size.label;
+        fontSizeSelect.appendChild(option);
+      });
+      
+      // Use default font size from settings
+      fontSizeSelect.value = appSettings.default_font_size;
+      
+      fontSizeSelect.addEventListener('click', (e) => {
+        // Stop the event from propagating to parent elements
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      fontSizeSelect.addEventListener('change', (e) => {
+        // Stop propagation to prevent other handlers from interfering
+        e.preventDefault();
+        e.stopPropagation();
+        const selectedSize = fontSizes.find(s => s.value === fontSizeSelect.value);
+        note.querySelector('textarea').style.fontSize = selectedSize.size;
+        debouncedSaveNotes();
+      });
+      
+      controlsRow.appendChild(fontSizeSelect);
+      
+      // Add font family dropdown
+      const fontFamilySelect = document.createElement('select');
+      fontFamilySelect.className = 'font-size-select';
+      
+      FONT_FAMILIES.forEach(font => {
+        const option = document.createElement('option');
+        option.value = font.value;
+        option.textContent = font.label;
+        fontFamilySelect.appendChild(option);
+      });
+      
+      // Use default font family from settings
+      fontFamilySelect.value = appSettings.default_font_family;
+      
+      fontFamilySelect.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      fontFamilySelect.addEventListener('change', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        applyFontFamily(note, fontFamilySelect.value);
+        debouncedSaveNotes();
+      });
+      
+      controlsRow.appendChild(fontFamilySelect);
+
+      // Add advanced tools buttons
+      if (appSettings.enable_formatting === 'true') {
+        const formatBtn = document.createElement('button');
+        formatBtn.className = 'format-btn';
+        formatBtn.title = "Text formatting";
+        formatBtn.textContent = 'A';
+        formatBtn.style.fontWeight = 'bold';
+        formatBtn.onclick = (e) => {
+          e.stopPropagation();
+          toggleFormatting(note);
+        };
+        controlsRow.appendChild(formatBtn);
+      }
+      
+      if (appSettings.enable_checklists === 'true') {
+        const checklistBtn = document.createElement('button');
+        checklistBtn.className = 'format-btn';
+        checklistBtn.title = "Add checklist";
+        checklistBtn.textContent = '☑️';
+        checklistBtn.onclick = (e) => {
+          e.stopPropagation();
+          addChecklist(note);
+        };
+        controlsRow.appendChild(checklistBtn);
+      }
+      
+      if (appSettings.enable_reminders === 'true') {
+        const reminderBtn = document.createElement('button');
+        reminderBtn.className = 'format-btn';
+        reminderBtn.title = "Set reminder";
+        reminderBtn.textContent = '⏰';
+        reminderBtn.onclick = (e) => {
+          e.stopPropagation();
+          showReminderDialog(note);
+        };
+        controlsRow.appendChild(reminderBtn);
+      }
+      
+      const alwaysOnTopBtn = document.createElement('button');
+      alwaysOnTopBtn.className = 'always-on-top-btn';
+      alwaysOnTopBtn.textContent = '📌';
+      alwaysOnTopBtn.title = "Pin note (stay on top)";
+      alwaysOnTopBtn.onclick = () => {
+        alwaysOnTopBtn.classList.toggle('active');
+        const isAlwaysOnTop = alwaysOnTopBtn.classList.contains('active');
+        
+        // Tell the main process to set the alwaysOnTop property
+        ipcRenderer.send('set-note-always-on-top', {
+          id: note.dataset.id,
+          alwaysOnTop: isAlwaysOnTop
+        });
+        
+        if (isAlwaysOnTop) {
+          note.style.zIndex = "1000";
+        } else {
+          note.style.zIndex = "";
+        }
+        
+        debouncedSaveNotes();
+      };
+      controlsRow.appendChild(alwaysOnTopBtn);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.textContent = '×';
+      deleteBtn.title = "Delete note";
+      deleteBtn.onclick = () => {
+        // Check if there's content in the note
+        const hasTitle = note.querySelector('.note-title').value.trim() !== '';
+        const hasText = note.querySelector('.note-editor') 
+          ? note.querySelector('.note-editor').innerHTML.trim() !== ''
+          : note.querySelector('textarea').value.trim() !== '';
+        
+        if (hasTitle || hasText) {
+          // Show confirmation dialog
+          showDeleteConfirmation(note);
+        } else {
+          // No content, delete immediately
+          deleteNote(note);
+        }
+      };
+      controlsRow.appendChild(deleteBtn);
+      
+      header.appendChild(controlsRow);
+      note.appendChild(header);
+      
+      // Create content area based on settings
+      if (appSettings.enable_formatting === 'true') {
+        // Create rich text editor
+        createRichTextEditor(note);
+      } else {
+        // Create simple textarea
+        const textarea = document.createElement('textarea');
+        textarea.placeholder = "Write your note here...";
+        textarea.oninput = () => debouncedSaveNotes();
+        note.appendChild(textarea);
+      }
+      
+      // Add timestamp footer
+      const footer = document.createElement('div');
+      footer.className = 'note-footer';
+      const timestamp_text = document.createElement('div');
+      timestamp_text.className = 'timestamp';
+      timestamp_text.textContent = `Created: ${formatDate(timestamp)}`;
+      footer.appendChild(timestamp_text);
+      note.appendChild(footer);
+
+      document.getElementById('notes-container').appendChild(note);
+      setTimeout(() => note.classList.remove('hidden'), 10);
+
+      // Make note draggable
+      makeDraggable(note);
+      makeResizable(note);
+
+      // Set as active note
+      setActiveNote(note);
+
+      return note;
+    }
+    
+    // Set active note
+    function setActiveNote(note) {
+      // Remove active class from previous active note
+      if (activeNote) {
+        activeNote.classList.remove('active-note');
+      }
+      
+      // Set new active note
+      activeNote = note;
+      if (activeNote) {
+        activeNote.classList.add('active-note');
+        // Don't automatically focus the textarea - let user decide where to focus
+      }
+    }
+    
+    // Delete active note
+    function deleteActiveNote() {
+      if (activeNote) {
+        // Check if there's content in the note
+        const hasTitle = activeNote.querySelector('.note-title').value.trim() !== '';
+        
+        // Check for text content based on editor type
+        let hasText = false;
+        const textEditor = activeNote.querySelector('.note-editor');
+        const textArea = activeNote.querySelector('textarea');
+        
+        if (textEditor) {
+          hasText = textEditor.innerText.trim() !== '';
+        } else if (textArea) {
+          hasText = textArea.value.trim() !== '';
+        }
+        
+        if (hasTitle || hasText) {
+          // Show confirmation dialog
+          showDeleteConfirmation(activeNote);
+        } else {
+          // No content, delete immediately
+          deleteNote(activeNote);
+        }
+      }
+    }
+    
+    // Function to show delete confirmation dialog
+    function showDeleteConfirmation(note) {
+      const dialog = document.getElementById('confirmation-dialog');
+      const overlay = document.getElementById('overlay');
+      
+      // Store reference to the note being deleted
+      noteToDelete = note;
+      
+      // Show dialog and overlay
+      dialog.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+      
+      // Focus on cancel button (safer default)
+      document.getElementById('cancel-delete').focus();
+    }
+    
+    // Function to hide the confirmation dialog
+    function hideDeleteConfirmation() {
+      const dialog = document.getElementById('confirmation-dialog');
+      const overlay = document.getElementById('overlay');
+      
+      dialog.classList.add('hidden');
+      overlay.classList.add('hidden');
+      noteToDelete = null;
+    }
+    
+    // Function to delete a note
+    function deleteNote(note) {
+      note.classList.add('hidden');
+      
+      // If this was the active note, clear activeNote
+      if (note === activeNote) {
+        activeNote = null;
+      }
+      
+      setTimeout(() => {
+        note.remove();
+        debouncedSaveNotes();
+      }, 300);
+    }
+
+    // Function to show help dialog
+    function toggleHelpDialog() {
+      const helpDialog = document.getElementById('help-dialog');
+      const overlay = document.getElementById('overlay');
+      
+      if (helpDialog.classList.contains('hidden')) {
+        helpDialog.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+      } else {
+        helpDialog.classList.add('hidden');
+        overlay.classList.add('hidden');
+      }
+    }
+    
+    // Function to filter notes by search text
+    function filterNotes(searchText) {
+      const notes = document.querySelectorAll('.note');
+      const normalizedSearchText = searchText.toLowerCase().trim();
+      
+      if (!normalizedSearchText) {
+        // Show all notes if search is empty
+        notes.forEach(note => {
+          note.classList.remove('hidden-by-search');
+        });
+        return;
+      }
+      
+      notes.forEach(note => {
+        const title = note.querySelector('.note-title').value.toLowerCase();
+        
+        // Handle both rich text editor and plain textarea
+        let content = '';
+        const editor = note.querySelector('.note-editor');
+        const textarea = note.querySelector('textarea');
+        
+        if (editor) {
+          // Rich text editor - use innerText to get plain text content
+          content = editor.innerText.toLowerCase();
+        } else if (textarea) {
+          // Plain textarea
+          content = textarea.value.toLowerCase();
+        }
+        
+        if (title.includes(normalizedSearchText) || content.includes(normalizedSearchText)) {
+          note.classList.remove('hidden-by-search');
+        } else {
+          note.classList.add('hidden-by-search');
+        }
+      });
+    }
+
+    // Debounced save to prevent too frequent saves
+    function debouncedSaveNotes() {
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveNotes();
+        saveTimeout = null;
+      }, 300);
+    }
+
+    function makeDraggable(element) {
+      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+      let isDragging = false;
+      
+      // Get the drag handle and header
+      const header = element.querySelector('.note-header');
+      const dragHandle = element.querySelector('.drag-handle');
+      
+      // Set up listeners for both the header and the drag handle
+      header.addEventListener('mousedown', dragMouseDown);
+      dragHandle.addEventListener('mousedown', dragMouseDown);
+      
+      function dragMouseDown(e) {
+        // Set as active note on click
+        setActiveNote(element);
+        
+        // Don't drag when clicking on selects, buttons, inputs, or their children
+        if (e.target.tagName === 'SELECT' || 
+            e.target.tagName === 'BUTTON' || 
+            e.target.tagName === 'OPTION' || 
+            e.target.tagName === 'INPUT' ||
+            e.target.closest('select') ||
+            e.target.closest('button') ||
+            e.target.closest('input') ||
+            e.target.closest('.note-title') ||
+            e.target.closest('.color-select') ||
+            e.target.closest('.font-size-select')) {
+          return;
+        }
+        
+        e.preventDefault();
+        element.classList.add('moving');
+        
+        // Get the current mouse position
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        
+        // Set up the movement listeners
+        document.addEventListener('mousemove', elementDrag);
+        document.addEventListener('mouseup', closeDragElement);
+        
+        isDragging = true;
+      }
+
+      function elementDrag(e) {
+        if (!isDragging) return;
+        
+        e.preventDefault();
+        
+        // Calculate the new position
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        
+        // Set the element's new position directly with transform for better performance
+        const newTop = element.offsetTop - pos2;
+        const newLeft = element.offsetLeft - pos1;
+        
+        element.style.top = newTop + "px";
+        element.style.left = newLeft + "px";
+      }
+
+      function closeDragElement() {
+        // Stop movement tracking
+        document.removeEventListener('mousemove', elementDrag);
+        document.removeEventListener('mouseup', closeDragElement);
+        
+        element.classList.remove('moving');
+        isDragging = false;
+        debouncedSaveNotes();
+      }
+    }
+
+    function makeResizable(element) {
+      const resizer = document.createElement('div');
+      resizer.className = 'resizer';
+      resizer.title = "Resize";
+      element.appendChild(resizer);
+
+      let isResizing = false;
+      let x = 0, y = 0, w = 0, h = 0;
+
+      resizer.addEventListener('mousedown', initResize);
+
+      function initResize(e) {
+        // Set as active note
+        setActiveNote(element);
+        
+        e.preventDefault();
+        element.classList.add('moving');
+        
+        x = e.clientX;
+        y = e.clientY;
+        w = element.offsetWidth;
+        h = element.offsetHeight;
+        
+        document.addEventListener('mousemove', resize);
+        document.addEventListener('mouseup', stopResize);
+        
+        isResizing = true;
+      }
+
+      function resize(e) {
+        if (!isResizing) return;
+        
+        // Calculate new size
+        const newWidth = Math.max(200, w + (e.clientX - x));
+        const newHeight = Math.max(150, h + (e.clientY - y));
+        
+        // Apply new size
+        element.style.width = newWidth + 'px';
+        element.style.height = newHeight + 'px';
+      }
+
+      function stopResize() {
+        document.removeEventListener('mousemove', resize);
+        document.removeEventListener('mouseup', stopResize);
+        
+        element.classList.remove('moving');
+        isResizing = false;
+        debouncedSaveNotes();
+      }
+    }
+
+    function saveNotes() {
+      notes = Array.from(document.querySelectorAll('.note')).map(note => {
+        // Get the font family class
+        let fontFamily = 'default';
+        for (const font of FONT_FAMILIES) {
+          if (note.classList.contains(font.class)) {
+            fontFamily = font.value;
+            break;
+          }
+        }
+        
+        // Get text content based on editor type
+        let textContent = '';
+        let formattedText = '';
+        
+        const editor = note.querySelector('.note-editor');
+        const textarea = note.querySelector('textarea');
+        
+        if (editor) {
+          // Rich text editor
+          textContent = editor.innerText;
+          formattedText = editor.innerHTML;
+        } else if (textarea) {
+          // Plain textarea
+          textContent = textarea.value;
+        }
+        
+        return {
+          id: note.dataset.id || Date.now().toString(),
+          title: note.querySelector('.note-title').value,
+          text: textContent,
+          formattedText: formattedText,
+          color: note.style.backgroundColor,
+          fontSize: note.querySelector('.font-size-select').value,
+          fontFamily: fontFamily,
+          x: parseInt(note.style.left),
+          y: parseInt(note.style.top),
+          width: note.offsetWidth,
+          height: note.offsetHeight,
+          alwaysOnTop: note.querySelector('.always-on-top-btn').classList.contains('active'),
+          createdAt: parseInt(note.dataset.createdAt),
+          hasChecklist: note.dataset.hasChecklist === 'true',
+          hasImages: note.dataset.hasImages === 'true'
+        };
+      });
+      
+      ipcRenderer.send('save-notes', notes);
+    }
+
+    // Load saved notes
+    ipcRenderer.invoke('load-notes').then(loadedNotes => {
+      loadedNotes.forEach(note => {
+        // Use saved createdAt timestamp or fallback to current time
+        const timestamp = note.created_at || Date.now();
+        const noteElement = createNote(note.x, note.y, timestamp);
+        noteElement.dataset.id = note.id;
+        
+        // Set title if it exists
+        if (note.title) {
+          noteElement.querySelector('.note-title').value = note.title;
+        }
+        
+        // Handle formatted content if it exists
+        if (note.formatted_text && appSettings.enable_formatting === 'true') {
+          // Convert textarea to editor if not already
+          if (!noteElement.querySelector('.note-editor')) {
+            // Remove textarea
+            if (noteElement.querySelector('textarea')) {
+              noteElement.querySelector('textarea').remove();
+            }
+            
+            // Create editor
+            const editor = createRichTextEditor(noteElement);
+            editor.innerHTML = note.formatted_text;
+          } else {
+            // Editor already exists
+            noteElement.querySelector('.note-editor').innerHTML = note.formatted_text;
+          }
+        } else {
+          // Use plain text
+          const textarea = noteElement.querySelector('textarea');
+          if (textarea) {
+            textarea.value = note.text || '';
+          }
+        }
+        
+        // Apply the saved color
+        if (note.color) {
+          noteElement.style.backgroundColor = note.color;
+          
+          // Find the appropriate color option and select it in the dropdown
+          const colorObj = findColorByValue(note.color);
+          const colorSelect = noteElement.querySelector('.color-select');
+          
+          // Set the dropdown value
+          if (colorSelect && colorObj) {
+            colorSelect.value = colorObj.value;
+          }
+        }
+        
+        // Apply font family if saved
+        if (note.font_family) {
+          applyFontFamily(noteElement, note.font_family);
+          
+          // Set font family dropdown
+          const fontFamilySelect = noteElement.querySelectorAll('select')[2]; // Third select is font family
+          if (fontFamilySelect) {
+            fontFamilySelect.value = note.font_family;
+          }
+        }
+        
+        // Set note properties
+        noteElement.dataset.hasChecklist = note.has_checklist ? 'true' : 'false';
+        noteElement.dataset.hasImages = note.has_images ? 'true' : 'false';
+        
+        noteElement.querySelector('.font-size-select').value = note.font_size || 'medium';
+        noteElement.style.width = note.width + 'px';
+        noteElement.style.height = note.height + 'px';
+        
+        if (note.always_on_top) {
+          noteElement.querySelector('.always-on-top-btn').classList.add('active');
+          noteElement.style.zIndex = "1000";
+          
+          // Tell main process about always on top notes
+          ipcRenderer.send('set-note-always-on-top', {
+            id: note.id,
+            alwaysOnTop: true
+          });
+        }
+      });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+N: Create new note
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        createNote();
+        saveNotes();
+      }
+      
+      // Delete key: Delete active note
+      if ((e.key === 'Delete' || e.key === 'Del') && activeNote) {
+        console.log("Delete key pressed with active note");
+        e.preventDefault();
+        deleteActiveNote();
+      }
+      
+      // Ctrl+F: Focus search
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+      }
+      
+      // Ctrl+H: Show help
+      if (e.ctrlKey && e.key === 'h') {
+        e.preventDefault();
+        toggleHelpDialog();
+      }
+
+      // Ctrl+E: Export notes
+      if (e.ctrlKey && e.key === 'e') {
+        console.log("Ctrl+E pressed");
+        e.preventDefault();
+        exportNotes();
+      }
+      
+      // Ctrl+S: Toggle settings panel
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        toggleSettingsPanel();
+      }
+      
+      // Escape: Clear search or close dialogs
+      if (e.key === 'Escape') {
+        // Close settings panel if open
+        if (document.getElementById('settings-panel').classList.contains('open')) {
+          toggleSettingsPanel();
+          return;
+        }
+      
+        // Close confirmation dialog if open
+        if (!document.getElementById('confirmation-dialog').classList.contains('hidden')) {
+          hideDeleteConfirmation();
+          return;
+        }
+        
+        // Close help dialog if open
+        if (!document.getElementById('help-dialog').classList.contains('hidden')) {
+          toggleHelpDialog();
+          return;
+        }
+
+        // Close export success dialog if open
+        if (!document.getElementById('export-success-dialog').classList.contains('hidden')) {
+          hideExportSuccessDialog();
+          return;
+        }
+        
+        // Clear search if not empty
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput.value.trim() !== '') {
+          searchInput.value = '';
+          filterNotes('');
+          return;
+        }
+      }
+    });
+
+    // Function to export notes
+    async function exportNotes() {
+      try {
+        console.log("Export function called");
+        
+        // Save notes first to ensure all data is up to date
+        saveNotes();
+        
+        // Collect all notes from the DOM
+        const notesToExport = Array.from(document.querySelectorAll('.note')).map(note => {
+          const textEditor = note.querySelector('.note-editor');
+          const textArea = note.querySelector('textarea');
+          
+          let text = '';
+          if (textEditor) {
+            text = textEditor.innerText;
+          } else if (textArea) {
+            text = textArea.value;
+          }
+          
+          return {
+            id: note.dataset.id || Date.now().toString(),
+            title: note.querySelector('.note-title').value,
+            text: text,
+            color: note.style.backgroundColor,
+            fontSize: note.querySelector('.font-size-select').value,
+            createdAt: note.dataset.createdAt
+          };
+        });
+        
+        if (notesToExport.length === 0) {
+          alert('No notes to export!');
+          return;
+        }
+        
+        console.log(`Exporting ${notesToExport.length} notes`);
+        
+        // Send notes to main process for export
+        const result = await ipcRenderer.invoke('export-notes', notesToExport);
+        
+        if (result.success) {
+          exportFolderPath = result.path;
+          showExportSuccessDialog(result.message);
+        } else {
+          if (result.message !== 'Export cancelled') {
+            alert(`Export failed: ${result.message}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error in exportNotes:", error);
+        alert(`Export failed: ${error.message}`);
+      }
+    }
+
+    // Function to show export success dialog
+    function showExportSuccessDialog(message) {
+      const dialog = document.getElementById('export-success-dialog');
+      const overlay = document.getElementById('overlay');
+      const messageElement = document.getElementById('export-success-message');
+      
+      messageElement.textContent = message;
+      
+      dialog.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+    }
+
+    // Function to hide export success dialog
+    function hideExportSuccessDialog() {
+      const dialog = document.getElementById('export-success-dialog');
+      const overlay = document.getElementById('overlay');
+      
+      dialog.classList.add('hidden');
+      overlay.classList.add('hidden');
+    }
+
+    // Initialize UI elements
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Load settings first
+      await loadSettings();
+      
+      // Confirmation dialog buttons
+      document.getElementById('cancel-delete').addEventListener('click', () => {
+        hideDeleteConfirmation();
+      });
+      
+      document.getElementById('confirm-delete').addEventListener('click', () => {
+        if (noteToDelete) {
+          deleteNote(noteToDelete);
+          hideDeleteConfirmation();
+        }
+      });
+      
+      // Help dialog
+      document.getElementById('helpBtn').addEventListener('click', toggleHelpDialog);
+      document.getElementById('close-help').addEventListener('click', toggleHelpDialog);
+      
+      // Search functionality
+      const searchInput = document.getElementById('searchInput');
+      const clearSearchBtn = document.getElementById('clearSearchBtn');
+      
+      searchInput.addEventListener('input', () => {
+        filterNotes(searchInput.value);
+        // Show clear button if there's text
+        if (searchInput.value.trim() !== '') {
+          clearSearchBtn.style.display = 'block';
+        } else {
+          clearSearchBtn.style.display = 'none';
+        }
+      });
+      
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        filterNotes('');
+        clearSearchBtn.style.display = 'none';
+      });
+      
+      // Initialize clear button visibility
+      clearSearchBtn.style.display = 'none';
+      
+      // Note activation on click
+      document.addEventListener('click', (e) => {
+        // Don't process clicks on select elements or their options
+        if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') {
+          return;
+        }
+      
+        // Check if clicked on or inside a note
+        const note = e.target.closest('.note');
+        if (note) {
+          setActiveNote(note);
+        } else if (!e.target.closest('.dialog') && !e.target.closest('#toolbar')) {
+          // If clicked outside notes and dialogs, deactivate current note
+          if (activeNote) {
+            activeNote.classList.remove('active-note');
+            activeNote = null;
+          }
+        }
+      });
+      
+      // Close dialog when clicking on overlay
+      document.getElementById('overlay').addEventListener('click', () => {
+        // Hide any open dialogs
+        document.getElementById('confirmation-dialog').classList.add('hidden');
+        document.getElementById('help-dialog').classList.add('hidden');
+        document.getElementById('export-success-dialog').classList.add('hidden');
+        document.getElementById('reminder-dialog').classList.add('hidden');
+        document.getElementById('overlay').classList.add('hidden');
+        document.getElementById('lightbox').classList.remove('active');
+        
+        if (document.getElementById('settings-panel').classList.contains('open')) {
+          toggleSettingsPanel();
+        }
+        
+        noteToDelete = null;
+        currentNoteId = null;
+      });
+
+      // Export success dialog
+      document.getElementById('close-export-dialog').addEventListener('click', hideExportSuccessDialog);
+      document.getElementById('open-export-folder').addEventListener('click', () => {
+        if (exportFolderPath) {
+          shell.openPath(exportFolderPath);
+        }
+        hideExportSuccessDialog();
+      });
+
+      // Settings panel
+      document.getElementById('settingsBtn').addEventListener('click', toggleSettingsPanel);
+      document.getElementById('close-settings').addEventListener('click', toggleSettingsPanel);
+      
+      // Theme selector
+      document.getElementById('theme-select').addEventListener('change', (e) => {
+        appSettings.theme = e.target.value;
+        applyTheme(appSettings.theme);
+      });
+      
+      // Default color picker and selector
+      const defaultColorInput = document.getElementById('default-color');
+      const defaultColorSelect = document.getElementById('default-color-select');
+      
+      // Set initial state of color selector based on saved settings
+      if (appSettings.default_color === 'random') {
+        defaultColorSelect.value = 'random';
+        defaultColorInput.style.display = 'none';
+      } else {
+        const matchingOption = Array.from(defaultColorSelect.options).find(opt => 
+          opt.value === appSettings.default_color);
+        
+        if (matchingOption) {
+          defaultColorSelect.value = appSettings.default_color;
+          defaultColorInput.style.display = 'none';
+        } else {
+          defaultColorSelect.value = 'custom';
+          defaultColorInput.value = appSettings.default_color;
+          defaultColorInput.style.display = 'inline-block';
+        }
+      }
+      
+      updateColorPreview(appSettings.default_color);
+      
+      defaultColorSelect.addEventListener('change', (e) => {
+        const selectedValue = e.target.value;
+        
+        if (selectedValue === 'custom') {
+          defaultColorInput.style.display = 'inline-block';
+          appSettings.default_color = defaultColorInput.value;
+        } else {
+          defaultColorInput.style.display = 'none';
+          appSettings.default_color = selectedValue;
+        }
+        
+        updateColorPreview(appSettings.default_color);
+      });
+      
+      defaultColorInput.addEventListener('input', () => {
+        appSettings.default_color = defaultColorInput.value;
+        updateColorPreview(defaultColorInput.value);
+      });
+      
+      defaultColorInput.addEventListener('change', () => {
+        appSettings.default_color = defaultColorInput.value;
+        updateColorPreview(defaultColorInput.value);
+      });
+      
+      // Default font size
+      document.getElementById('default-font-size').addEventListener('change', (e) => {
+        appSettings.default_font_size = e.target.value;
+      });
+      
+      // Default font family
+      document.getElementById('default-font-family').addEventListener('change', (e) => {
+        appSettings.default_font_family = e.target.value;
+      });
+      
+      // Advanced settings toggles
+      document.getElementById('enable-formatting').addEventListener('change', (e) => {
+        appSettings.enable_formatting = e.target.checked ? 'true' : 'false';
+      });
+      
+      document.getElementById('enable-checklists').addEventListener('change', (e) => {
+        appSettings.enable_checklists = e.target.checked ? 'true' : 'false';
+      });
+      
+      document.getElementById('enable-images').addEventListener('change', (e) => {
+        appSettings.enable_images = e.target.checked ? 'true' : 'false';
+      });
+      
+      document.getElementById('enable-reminders').addEventListener('change', (e) => {
+        appSettings.enable_reminders = e.target.checked ? 'true' : 'false';
+      });
+      
+      // Apply settings button
+      document.getElementById('apply-settings').addEventListener('click', () => {
+        saveSettings();
+        
+        // Update all notes to reflect new settings
+        document.querySelectorAll('.note').forEach(note => {
+          updateNoteFormatting(note);
+        });
+        
+        toggleSettingsPanel();
+      });
+      
+      // Reminder dialog
+      document.getElementById('cancel-reminder').addEventListener('click', hideReminderDialog);
+      document.getElementById('save-reminder').addEventListener('click', createReminder);
+      
+      // Lightbox
+      document.getElementById('lightbox-close').addEventListener('click', () => {
+        document.getElementById('lightbox').classList.remove('active');
+      });
+      
+      // Listen for open-note events from main process (for reminders)
+      ipcRenderer.on('open-note', (event, noteId) => {
+        // Find the note with this ID
+        const note = document.querySelector(`.note[data-id="${noteId}"]`);
+        if (note) {
+          setActiveNote(note);
+          // Scroll to make note visible if needed
+          note.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+
+      // Success dialog
+      document.getElementById('close-success-dialog').addEventListener('click', hideSuccessDialog);
+    });
+
+    // New note button
+    document.getElementById('newNoteBtn').onclick = () => {
+      createNote();
+      saveNotes();
+    };
+    
+    // Export button
+    document.getElementById('exportBtn').onclick = exportNotes;
+
+    // Create a reminder
+    function createReminder() {
+      if (!currentNoteId) return;
+      
+      const title = document.getElementById('reminder-title').value;
+      const message = document.getElementById('reminder-message').value;
+      const datetime = document.getElementById('reminder-datetime').value;
+      
+      // Get notification options
+      const playSound = document.getElementById('reminder-play-sound').checked;
+      const urgentStyle = document.getElementById('reminder-urgent').checked;
+      
+      if (!datetime) {
+        alert('Please select a date and time.');
+        return;
+      }
+      
+      const reminderTime = new Date(datetime).getTime();
+      
+      // Validate time (must be in the future)
+      if (reminderTime <= Date.now()) {
+        alert('Reminder time must be in the future.');
+        return;
+      }
+      
+      // Create reminder
+      ipcRenderer.send('set-reminder', {
+        noteId: currentNoteId,
+        title: title,
+        message: message,
+        time: reminderTime,
+        playSound: playSound,
+        urgentStyle: urgentStyle
+      });
+      
+      // Hide dialog
+      hideReminderDialog();
+      
+      // Show confirmation with custom dialog instead of alert
+      showSuccessDialog('Reminder set for ' + new Date(reminderTime).toLocaleString());
+    }
+    
+    // Show success dialog
+    function showSuccessDialog(message) {
+      const dialog = document.getElementById('success-dialog');
+      const overlay = document.getElementById('overlay');
+      const messageElement = document.getElementById('success-message');
+      
+      messageElement.textContent = message;
+      
+      dialog.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+      
+      // Focus on OK button
+      document.getElementById('close-success-dialog').focus();
+    }
+    
+    // Hide success dialog
+    function hideSuccessDialog() {
+      const dialog = document.getElementById('success-dialog');
+      const overlay = document.getElementById('overlay');
+      
+      dialog.classList.add('hidden');
+      
+      // Only hide overlay if no other dialogs are open
+      if (document.getElementById('confirmation-dialog').classList.contains('hidden') &&
+          document.getElementById('help-dialog').classList.contains('hidden') &&
+          document.getElementById('export-success-dialog').classList.contains('hidden') &&
+          document.getElementById('reminder-dialog').classList.contains('hidden') &&
+          !document.getElementById('settings-panel').classList.contains('open')) {
+        overlay.classList.add('hidden');
+      }
+    }
+
+    // Update note formatting based on current settings
+    function updateNoteFormatting(note) {
+      const hasEditor = note.querySelector('.note-editor');
+      const hasTextarea = note.querySelector('textarea');
+      
+      // If formatting is enabled and note has textarea, convert it
+      if (appSettings.enable_formatting === 'true' && !hasEditor && hasTextarea) {
+        toggleFormatting(note);
+      }
+      
+      // Update format button visibility
+      const formatBtn = note.querySelector('.format-btn[title="Text formatting"]');
+      if (formatBtn) {
+        formatBtn.style.display = appSettings.enable_formatting === 'true' ? 'block' : 'none';
+      }
+      
+      // Update checklist button visibility
+      const checklistBtn = note.querySelector('.format-btn[title="Add checklist"]');
+      if (checklistBtn) {
+        checklistBtn.style.display = appSettings.enable_checklists === 'true' ? 'block' : 'none';
+      }
+      
+      // Update reminder button visibility
+      const reminderBtn = note.querySelector('.format-btn[title="Set reminder"]');
+      if (reminderBtn) {
+        reminderBtn.style.display = appSettings.enable_reminders === 'true' ? 'block' : 'none';
+      }
+    }
+
+    // Create rich text editor for a note
+    function createRichTextEditor(note) {
+      // Create formatting toolbar
+      const toolbar = document.createElement('div');
+      toolbar.className = 'formatting-toolbar';
+      
+      // Bold button
+      const boldBtn = createFormatButton('B', 'Bold', 'bold');
+      toolbar.appendChild(boldBtn);
+      
+      // Italic button
+      const italicBtn = createFormatButton('I', 'Italic', 'italic');
+      toolbar.appendChild(italicBtn);
+      
+      // Underline button
+      const underlineBtn = createFormatButton('U', 'Underline', 'underline');
+      toolbar.appendChild(underlineBtn);
+      
+      // Divider
+      const divider1 = document.createElement('div');
+      divider1.className = 'format-divider';
+      toolbar.appendChild(divider1);
+      
+      // Ordered list button
+      const olBtn = createFormatButton('1.', 'Ordered List', 'insertOrderedList');
+      toolbar.appendChild(olBtn);
+      
+      // Unordered list button
+      const ulBtn = createFormatButton('•', 'Unordered List', 'insertUnorderedList');
+      toolbar.appendChild(ulBtn);
+      
+      // Divider
+      const divider2 = document.createElement('div');
+      divider2.className = 'format-divider';
+      toolbar.appendChild(divider2);
+      
+      // Blockquote button
+      const quoteBtn = createFormatButton('"', 'Quote', 'formatBlock', 'blockquote');
+      toolbar.appendChild(quoteBtn);
+      
+      // If images are enabled, add image upload button
+      if (appSettings.enable_images === 'true') {
+        // Divider
+        const divider3 = document.createElement('div');
+        divider3.className = 'format-divider';
+        toolbar.appendChild(divider3);
+        
+        // Image button
+        const imgBtn = document.createElement('button');
+        imgBtn.className = 'format-btn';
+        imgBtn.textContent = '🖼️';
+        imgBtn.title = "Add Image";
+        imgBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          insertImage(note);
+        });
+        toolbar.appendChild(imgBtn);
+      }
+      
+      note.appendChild(toolbar);
+      
+      // Create contenteditable div
+      const editor = document.createElement('div');
+      editor.className = 'note-editor';
+      editor.contentEditable = 'true';
+      editor.setAttribute('spellcheck', 'false');
+      editor.setAttribute('data-placeholder', 'Write your note here...');
+      editor.addEventListener('input', () => debouncedSaveNotes());
+      editor.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          document.execCommand('insertHTML', false, '&nbsp;&nbsp;&nbsp;&nbsp;');
+        }
+      });
+      
+      note.appendChild(editor);
+      
+      return editor;
+    }
+    
+    // Create format button helper
+    function createFormatButton(text, title, command, value = null) {
+      const button = document.createElement('button');
+      button.className = 'format-btn';
+      button.textContent = text;
+      button.title = title;
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Focus the editor first to ensure commands work properly
+        const note = button.closest('.note');
+        if (note) {
+          const editor = note.querySelector('.note-editor');
+          if (editor) {
+            editor.focus();
+            document.execCommand(command, false, value);
+          }
+        }
+        
+        button.blur(); // Remove focus
+      });
+      return button;
+    }
+    
+    // Toggle formatting toolbar and editor
+    function toggleFormatting(note) {
+      const hasEditor = note.querySelector('.note-editor');
+      const hasTextarea = note.querySelector('textarea');
+      
+      if (hasEditor) {
+        // Already has formatting, nothing to do
+        return;
+      }
+      
+      if (hasTextarea) {
+        // Convert textarea to rich text editor
+        const textContent = hasTextarea.value;
+        hasTextarea.remove();
+        
+        const editor = createRichTextEditor(note);
+        editor.innerText = textContent; // Use innerText to preserve line breaks
+        
+        // Force save
+        debouncedSaveNotes();
+      }
+    }
+    
+    // Insert image into note
+    function insertImage(note) {
+      // Create file input
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.style.display = 'none';
+      document.body.appendChild(fileInput);
+      
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+          document.body.removeChild(fileInput);
+          return;
+        }
+        
+        // Check file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Image size exceeds 5MB limit.');
+          document.body.removeChild(fileInput);
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const imageData = event.target.result;
+          
+          // Save image to database
+          if (note.dataset.id) {
+            ipcRenderer.send('save-image', {
+              noteId: note.dataset.id,
+              imageData: imageData,
+              fileName: file.name
+            });
+            
+            // Add image placeholder
+            const editor = note.querySelector('.note-editor');
+            if (editor) {
+              // Create image container
+              const imgContainer = document.createElement('div');
+              imgContainer.className = 'image-container';
+              
+              // Create image element
+              const img = document.createElement('img');
+              img.className = 'note-image';
+              img.src = imageData;
+              img.alt = file.name;
+              img.addEventListener('click', () => {
+                showImagePreview(imageData);
+              });
+              
+              imgContainer.appendChild(img);
+              
+              // Create overlay with delete button
+              const overlay = document.createElement('div');
+              overlay.className = 'image-overlay';
+              
+              const deleteBtn = document.createElement('button');
+              deleteBtn.className = 'image-action';
+              deleteBtn.innerHTML = '×';
+              deleteBtn.title = 'Remove image';
+              deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (confirm('Remove this image?')) {
+                  imgContainer.remove();
+                  debouncedSaveNotes();
+                }
+              });
+              
+              overlay.appendChild(deleteBtn);
+              imgContainer.appendChild(overlay);
+              
+              // Insert at cursor or append to editor
+              editor.appendChild(imgContainer);
+              note.dataset.hasImages = 'true';
+              debouncedSaveNotes();
+            }
+          }
+          
+          document.body.removeChild(fileInput);
+        };
+        
+        reader.readAsDataURL(file);
+      });
+      
+      fileInput.click();
+    }
+    
+    // Show image preview in lightbox
+    function showImagePreview(src) {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImage = document.getElementById('lightbox-image');
+      
+      lightboxImage.src = src;
+      lightbox.classList.add('active');
+      
+      // Add event listeners
+      lightbox.addEventListener('click', closeLightbox);
+      document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+      
+      function closeLightbox() {
+        lightbox.classList.remove('active');
+        lightbox.removeEventListener('click', closeLightbox);
+        document.getElementById('lightbox-close').removeEventListener('click', closeLightbox);
+      }
+    }
+    
+    // Add a checklist to a note
+    function addChecklist(note) {
+      const editor = note.querySelector('.note-editor');
+      if (!editor) return;
+      
+      // Create checklist container
+      const checklist = document.createElement('div');
+      checklist.className = 'checklist-container';
+      
+      // Create first item
+      const item = createChecklistItem();
+      checklist.appendChild(item);
+      
+      // Create "Add item" button
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-checklist-item';
+      addBtn.textContent = '+ Add item';
+      addBtn.addEventListener('click', () => {
+        const newItem = createChecklistItem();
+        checklist.insertBefore(newItem, addBtn);
+        newItem.querySelector('.checklist-text').focus();
+      });
+      
+      checklist.appendChild(addBtn);
+      editor.appendChild(checklist);
+      
+      // Focus on the first item
+      item.querySelector('.checklist-text').focus();
+      
+      // Mark note as having a checklist
+      note.dataset.hasChecklist = 'true';
+      debouncedSaveNotes();
+    }
+    
+    // Create a single checklist item
+    function createChecklistItem(checked = false, text = '') {
+      const item = document.createElement('div');
+      item.className = 'checklist-item';
+      if (checked) item.classList.add('checked');
+      
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'checklist-checkbox';
+      checkbox.checked = checked;
+      checkbox.addEventListener('change', () => {
+        item.classList.toggle('checked', checkbox.checked);
+        debouncedSaveNotes();
+      });
+      
+      const textInput = document.createElement('input');
+      textInput.type = 'text';
+      textInput.className = 'checklist-text';
+      textInput.value = text;
+      textInput.placeholder = 'List item...';
+      textInput.addEventListener('input', () => debouncedSaveNotes());
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'checklist-remove';
+      removeBtn.innerHTML = '×';
+      removeBtn.addEventListener('click', () => {
+        // Check if this is the last item in the checklist
+        const parent = item.closest('.checklist-container');
+        const items = parent.querySelectorAll('.checklist-item');
+        
+        // Remove this item
+        item.remove();
+        
+        // If it was the last item, remove the entire checklist container
+        if (items.length <= 1) {
+          parent.remove();
+          
+          // Update note's dataset
+          const note = parent.closest('.note');
+          if (note) {
+            note.dataset.hasChecklist = 'false';
+          }
+        }
+        
+        debouncedSaveNotes();
+      });
+      
+      item.appendChild(checkbox);
+      item.appendChild(textInput);
+      item.appendChild(removeBtn);
+      
+      return item;
+    }
+    
+    // Show reminder dialog
+    function showReminderDialog(note) {
+      if (!note.dataset.id) {
+        // Save the note first to get an ID
+        saveNotes(() => showReminderDialog(note));
+        return;
+      }
+      
+      currentNoteId = note.dataset.id;
+      
+      // Set default time (1 hour from now)
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+      const defaultTime = now.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:MM
+      
+      // Set default values
+      document.getElementById('reminder-title').value = note.querySelector('.note-title').value || 'Note Reminder';
+      document.getElementById('reminder-message').value = '';
+      document.getElementById('reminder-datetime').value = defaultTime;
+      
+      // Show dialog
+      const dialog = document.getElementById('reminder-dialog');
+      const overlay = document.getElementById('overlay');
+      
+      dialog.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+    }
+    
+    // Hide reminder dialog
+    function hideReminderDialog() {
+      const dialog = document.getElementById('reminder-dialog');
+      const overlay = document.getElementById('overlay');
+      
+      dialog.classList.add('hidden');
+      
+      // Only hide overlay if no other dialogs are open
+      if (document.getElementById('confirmation-dialog').classList.contains('hidden') &&
+          document.getElementById('help-dialog').classList.contains('hidden') &&
+          document.getElementById('export-success-dialog').classList.contains('hidden') &&
+          document.getElementById('success-dialog').classList.contains('hidden') &&
+          !document.getElementById('settings-panel').classList.contains('open')) {
+        overlay.classList.add('hidden');
+      }
+      
+      currentNoteId = null;
+    }
+  </script>
+</body>
+</html> 

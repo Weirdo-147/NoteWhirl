@@ -1,0 +1,46 @@
+{
+  "name": "notewhirl",
+  "version": "1.2.0",
+  "description": "A minimalistic, fast, and reliable desktop sticky notes application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "rebuild": "electron-rebuild",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "electron",
+    "sticky-notes",
+    "desktop-app"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "electron-rebuild": "^3.2.9"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.2.2"
+  },
+  "build": {
+    "appId": "com.notewhirl.app",
+    "productName": "NoteWhirl",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon-3.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon-3.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon-3.png"
+    }
+  }
+}
