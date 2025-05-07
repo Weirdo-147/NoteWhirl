@@ -626,6 +626,10 @@ function showTrayHelp() {
     }
   });
 
+  // Get absolute path for icon
+  const iconPath = path.join(__dirname, 'assets/icon-3.png');
+  const iconPathUrl = 'file://' + iconPath.replace(/\\/g, '/');
+
   // Create a simple HTML content to explain how to find the tray icon
   const htmlContent = `
     <!DOCTYPE html>
@@ -670,11 +674,11 @@ function showTrayHelp() {
       </style>
     </head>
     <body>
-      <h2><img src="assets/icon-3.png" class="app-icon">Finding NoteWhirl in System Tray</h2>
+      <h2><img src="${iconPathUrl}" class="app-icon">Finding NoteWhirl in System Tray</h2>
       <div class="steps">
         <div class="step">1. Look at the bottom-right corner of your screen in the taskbar (notification area)</div>
         <div class="step">2. Click on the up-arrow icon (^) to show hidden icons</div>
-        <div class="step">3. Look for the NoteWhirl icon <img src="assets/icon-3.png" style="width: 16px; height: 16px; vertical-align: middle;"></div>
+        <div class="step">3. Look for the NoteWhirl icon <img src="${iconPathUrl}" style="width: 16px; height: 16px; vertical-align: middle;"></div>
         <div class="step">4. Click on the icon to restore the app</div>
         <div class="step">5. To make the icon always visible, drag it from the hidden icons area to your taskbar</div>
       </div>

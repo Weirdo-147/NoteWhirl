@@ -1297,4 +1297,21 @@ body.theme-dark .toggle-slider {
 /* Ensure the advanced features toggle properly in settings */
 .settings-section-advanced .settings-section-title {
   margin-bottom: 10px;
+}
+
+/* Cute GIF animation in bottom right corner */
+.cute-corner-gif {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 100px; /* adjust size as needed */
+  height: auto;
+  z-index: 1000; /* ensure it appears above other content */
+  pointer-events: none; /* allows clicking through the GIF */
+}
+
+/* For dark theme adjustment if needed */
+body.theme-dark .cute-corner-gif {
+  /* Add any dark theme specific adjustments here if needed */
+  /* For example: filter: brightness(0.8); */
 } 
