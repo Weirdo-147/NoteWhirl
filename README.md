@@ -24,7 +24,7 @@ A minimalistic, fast, and reliable desktop sticky notes application built with E
 
 ### Download Pre-built Binaries
 
-Download the latest release for your platform from the [Releases](https://github.com/YourUsername/NoteWhirl/releases) page.
+Download the latest release for your platform from the [Releases](https://github.com/Weirdo-147/NoteWhirl/releases) page.
 
 ### Build from Source
 
