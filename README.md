@@ -30,7 +30,7 @@ Download the latest release for your platform from the [Releases](https://github
 
 1. Clone the repository:
    ```
-   git clone https://github.com/YourUsername/NoteWhirl.git
+   git clone https://github.com/Weirdo-147/NoteWhirl.git
    cd NoteWhirl
    ```
 
